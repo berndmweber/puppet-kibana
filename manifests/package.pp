@@ -44,14 +44,41 @@ class kibana::package {
 
     }
 
+    if $kibana::pkg_source {
+      $tmpSource = "/tmp/${kibana::pkg_source}"
+
+      $extArray = split($kibana::pkg_source, '\.')
+      $ext = $extArray[-1]
+
+      file { $tmpSource:
+        ensure => file,
+        source => "puppet:///modules/kibana/${kibana::pkg_source}",
+        owner  => 'root',
+        group  => 'root',
+        backup => false,
+        before => Exec [ 'install-kibana' ],
+      }
+      exec { 'install-kibana' :
+        cwd     => '/usr/local/lib',
+        path    => ['/usr/bin', '/bin'],
+        command => "tar -xzf ${tmpSource} && mv `basename ${kibana::pkg_source} .tar.gz` Kibana",
+        creates => $kibana::params::install_path,
+      }
+    }
+
   # set params: removal
   } else {
     $package_ensure = 'purged'
+
+    file { $kibana::params::install_path:
+      ensure => absent,
+    }
   }
 
   # action
-  package { $kibana::params::package:
-    ensure => $package_ensure,
+  if (($ext != undef) and ($ext != 'gz')) {
+    package { $kibana::params::package:
+      ensure => $package_ensure,
+    }
   }
-
 }

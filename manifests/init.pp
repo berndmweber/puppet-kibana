@@ -80,7 +80,8 @@ class kibana(
   $status      = $kibana::params::status,
   $version     = false,
   $standalone  = true,
-  $config_file = false
+  $pkg_source  = $kibana::params::tar_pkg,
+  $config_file = 'KibanaConfig.rb'
 ) inherits kibana::params {
 
   #### Validate parameters

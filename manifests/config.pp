@@ -30,14 +30,21 @@ class kibana::config {
 
     file { 'kibana_config':
       ensure  => 'present',
-      path    => '/usr/local/kibana/KibanaConfig.rb',
+      path    => "${kibana::params::install_path}/KibanaConfig.rb",
       mode    => '0644',
       owner   => 'root',
       group   => 'root',
-      source  => "puppet:///${kibana::config_file}",
-      notify  => Service['kibana'],
+      content => template ( "kibana/${kibana::config_file}.erb" ),
+      notify  => [ Exec [ 'configure-kibana' ], Service['kibana'] ],
+    }
+
+    exec { 'configure-kibana' :
+      cwd         => $kibana::params::install_path,
+      path        => ['/usr/bin', '/bin', '/usr/local/bin'],
+      command     => 'bundle install',
+      refreshonly => true,
+      require     => Class [ 'ruby::configure' ],
     }
 
   }
-
 }

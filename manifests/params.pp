@@ -42,6 +42,10 @@ class kibana::params {
 
   #### Internal module values
 
+  $tar_pkg = 'Kibana-0.2.0.tar.gz'
+
+  $install_path = '/usr/local/lib/Kibana'
+
   # packages
   case $::operatingsystem {
     'CentOS', 'Fedora', 'Scientific': {
